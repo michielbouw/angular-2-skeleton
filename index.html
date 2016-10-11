@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <title>Skeleton app for angular 2</title>
+    <base href="/">
+    <meta charset="utf-8">
+    <meta name="description" content="Skeleton app for angular 2">
+    <meta name="author" content="M.P. Bouw">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="images/icons/apple-touch-icon.png" />
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/icons/metro-tile.png">
+    <link rel="icon" href="images/icons/favicon.ico" type="image/x-icon" />
+    <!--[if IE]><link rel="shortcut icon" href="images/icons/favicon.ico" type="image/x-icon" /><![endif]-->
+    <link rel="icon" href="images/icons/favicon.png" type="image/png" />
+
+    <link rel="stylesheet" type="text/css" href="dist/styles/vendors.min.css">
+    <!--<link rel="stylesheet" type="text/css" href="dist/styles/app.min.css">-->
+
+    <!--[if lt IE 9]>
+        <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript" src="dist/scripts/vendors.min.js"></script>
+    <script type="text/javascript" src="systemjs.config.js"></script>
+    <!--<script type="text/javascript" src="dist/scripts/app.min.js"></script>-->
+    <script>
+        System.import('app').catch(function(err){ console.error(err); });
+    </script>
+</head>
+<body>
+
+<main-app>
+    Loading...
+</main-app>
+
+<script type="text/javascript" src="dist/scripts/vendors-bottom.min.js"></script>
+
+</body>
+</html>
