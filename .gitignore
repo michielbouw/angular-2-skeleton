@@ -6,7 +6,7 @@
 .bower-tmp/
 bower_components/
 node_modules/
-
+typings/
 dist/
 
 newrelic_agent.log
