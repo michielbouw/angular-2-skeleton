@@ -1,0 +1,10 @@
+.vagrant/
+.idea/
+.bower-cache/
+.bower-registry/
+.bower-tmp/
+bower_components/
+node_modules/
+
+newrelic_agent.log
+npm_debug.log
