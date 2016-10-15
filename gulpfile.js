@@ -70,6 +70,8 @@ gulp.task('build:modules', ['build:main'], folders('dist/app/', function (module
 gulp.task('copy:resources', ['clean'], function () {
     var files = gulp.src([
         'app/**/*',
+        '!app/**/styles/',
+        '!app/**/*.scss',
         '!app/**/*.ts'
     ], {
         base: './'
@@ -115,7 +117,7 @@ gulp.task('build:styles', ['copy:resources'], function () {
     return es.concat(vendors, styles);
 });
 
-// build dependencies
+// build dependencies dev
 gulp.task('build:deps:dev', ['clean'], function () {
     return gulp.src([
         'static/scripts/*.js'
@@ -162,6 +164,8 @@ gulp.task('build:modules:prod', ['build:main:prod'], folders('dist/app/', functi
 gulp.task('copy:resources:prod', ['clean'], function () {
     var files = gulp.src([
         'app/**/*',
+        '!app/**/styles/',
+        '!app/**/*.scss',
         '!app/**/*.ts'
     ], {
         base: './'

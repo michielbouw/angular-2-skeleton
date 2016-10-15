@@ -11,10 +11,10 @@ export class Hero {
         <h1>Angular 2 Skeleton App</h1><br>
         <h2>{{ title }}</h2>
         <p>{{ hero.name }} details!</p>
-        <div><label>id: </label>{{hero.id}}</div>
+        <div><label>id: </label>{{ hero.id }}</div>
         <div>
             <label>name: </label>
-            <input value="{{hero.name}}" placeholder="name">
+            <input [(ngModel)]="hero.name" placeholder="name">
         </div>
         `
 })
