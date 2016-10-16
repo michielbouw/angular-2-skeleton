@@ -17,27 +17,29 @@
     <!--[if IE]><link rel="shortcut icon" href="images/icons/favicon.ico" type="image/x-icon" /><![endif]-->
     <link rel="icon" href="images/icons/favicon.png" type="image/png" />
 
-    <link rel="stylesheet" type="text/css" href="dist/styles/vendors.min.css">
-    <link rel="stylesheet" type="text/css" href="dist/styles/app.min.css">
+    <link rel="stylesheet" type="text/css" href="styles/vendors.min.css">
+    <link rel="stylesheet" type="text/css" href="styles/app.min.css">
 
     <!--[if lt IE 9]>
         <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
     <![endif]-->
 
-    <script type="text/javascript" src="dist/scripts/vendors.min.js"></script>
-    <script type="text/javascript" src="systemjs.config.js"></script>
-    <!--<script type="text/javascript" src="dist/scripts/app.min.js"></script>-->
-    <script>
-        System.import('app').catch(function(err){ console.error(err); });
-    </script>
+    <script type="text/javascript" src="scripts/vendors.min.js"></script>
+
+    <!-- build:app -->
+    <script type="text/javascript" src="systemjs.config.dev.js"></script>
+    <!-- endbuild -->
+
+    <!-- build:deps -->
+    <!-- endbuild -->
 </head>
 <body>
+    <main-app>
+        Loading...
+    </main-app>
 
-<main-app>
-    Loading...
-</main-app>
+    <script type="text/javascript" src="scripts/vendors-bottom.min.js"></script>
 
-<script type="text/javascript" src="dist/scripts/vendors-bottom.min.js"></script>
-
+    <script>System.import('app').catch(function(err){ console.error(err); });</script>
 </body>
 </html>

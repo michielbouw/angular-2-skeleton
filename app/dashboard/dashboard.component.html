@@ -1,0 +1,10 @@
+<div class="dashboard-content">
+    <h2>Top Heroes</h2>
+    <div class="grid grid-pad">
+        <div *ngFor="let hero of heroes" (click)="gotoDetail(hero)" class="col-xs-12 col-lg-3">
+            <div class="module hero">
+                <h4>{{ hero.name }}</h4>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,12 +2,16 @@ const gulp          = require('gulp');
 
 const annotate      = require('gulp-ng-annotate');
 const autoprefixer  = require('gulp-autoprefixer');
+const Builder       = require('systemjs-builder');
 const concat        = require('gulp-concat');
 const del           = require('del');
 const es            = require('event-stream');
 const folders       = require('gulp-folders');
 const htmlmin       = require('gulp-htmlmin');
+const htmlreplace   = require('gulp-html-replace');
 const include       = require('gulp-include');
+const inlineTemp    = require('gulp-inline-ng2-template');
+const jsmin         = require('gulp-jsmin');
 const path          = require('path');
 const sass          = require('gulp-sass');
 const sourcemaps    = require('gulp-sourcemaps');
@@ -32,43 +36,13 @@ gulp.task('tslint', function () {
         .pipe(tslint.report());
 });
 
-// TypeScript compile
-gulp.task('compile', ['clean', 'tslint'], function () {
-    return gulp
-        .src('app/**/*.ts')
-        .pipe(sourcemaps.init())
-        .pipe(typescript(tscConfig.compilerOptions))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('dist/app'));
-});
 
 /* dev scripts */
-
-// compile main app
-gulp.task('build:main', ['compile'], function () {
-    return gulp.src([
-        'dist/app/main.js',
-        'dist/app/app.*.js'
-    ])
-        .pipe(annotate())
-        .pipe(concat('_app.js'))
-        .pipe(gulp.dest('dist/js'));
-});
-
-// compile modules
-gulp.task('build:modules', ['build:main'], folders('dist/app/', function (module) {
-    return gulp.src([
-        path.join('dist/app/', module, module + '.*.js'),
-        path.join('dist/app/', module, '**/*.js')
-    ])
-        .pipe(annotate())
-        .pipe(concat(module + '.js'))
-        .pipe(gulp.dest('dist/js'));
-}));
 
 // copy resources
 gulp.task('copy:resources', ['clean'], function () {
     var files = gulp.src([
+        'systemjs.config.dev.js',
         'app/**/*',
         '!app/**/styles/',
         '!app/**/*.scss',
@@ -84,10 +58,35 @@ gulp.task('copy:resources', ['clean'], function () {
     var fontawesome2 = gulp.src('node_modules/bootstrap-sass/assets/fonts/bootstrap/**/*')
         .pipe(gulp.dest('dist/styles/fonts/bootstrap/'));
 
+    var rxjs = gulp.src(['node_modules/rxjs/**/*'])
+        .pipe(gulp.dest('dist/scripts/rxjs'));
+
+    var webapi = gulp.src(['node_modules/angular2-in-memory-web-api/**/*'])
+        .pipe(gulp.dest('dist/scripts/angular2-in-memory-web-api'));
+
+    var angular2 = gulp.src(['node_modules/@angular/**/*'])
+        .pipe(gulp.dest('dist/scripts/@angular'));
+
     var images = gulp.src('static/images/**/*')
         .pipe(gulp.dest('dist/images/'));
 
-    return es.concat(files, fontawesome, fontawesome2, images);
+    return es.concat(files, fontawesome, fontawesome2, rxjs, webapi, angular2, images);
+});
+
+// TypeScript compile
+gulp.task('compile', ['clean', 'tslint'], function () {
+    return gulp.src('app/**/*.ts')
+        .pipe(inlineTemp({ UseRelativePaths: true, indent: 0, removeLineBreaks: true }))
+        .pipe(sourcemaps.init())
+        .pipe(typescript(tscConfig.compilerOptions))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/app'));
+});
+
+// build html
+gulp.task('html', ['copy:resources', 'compile'], function() {
+    gulp.src('index.html')
+        .pipe(gulp.dest('dist'));
 });
 
 // build styles
@@ -117,16 +116,8 @@ gulp.task('build:styles', ['copy:resources'], function () {
     return es.concat(vendors, styles);
 });
 
-// build dependencies dev
-gulp.task('build:deps:dev', ['clean'], function () {
-    return gulp.src([
-        'static/scripts/*.js'
-    ]).pipe(include())
-        .pipe(gulp.dest('dist/scripts/'));
-});
-
 // build dependencies
-gulp.task('build:deps', ['clean', 'build:modules'], function () {
+gulp.task('build:deps', ['clean'], function () {
     return gulp.src([
         'static/scripts/*.js'
     ]).pipe(include())
@@ -136,42 +127,8 @@ gulp.task('build:deps', ['clean', 'build:modules'], function () {
 
 /* production scripts */
 
-// compile main app production
-gulp.task('build:main:prod', ['compile'], function () {
-    return gulp.src([
-        'dist/app/main.js',
-        'dist/app/app.*.js'
-    ])
-        .pipe(annotate())
-        .pipe(uglify())
-        .pipe(concat('_app.js'))
-        .pipe(gulp.dest('dist/js'));
-});
-
-// compile modules production
-gulp.task('build:modules:prod', ['build:main:prod'], folders('dist/app/', function (module) {
-    return gulp.src([
-        path.join('dist/app/', module, module + '.module.js'),
-        path.join('dist/app/', module, '**/*.js')
-    ])
-        .pipe(annotate())
-        .pipe(uglify())
-        .pipe(concat(module + '.js'))
-        .pipe(gulp.dest('dist/js'));
-}));
-
 // copy resources
 gulp.task('copy:resources:prod', ['clean'], function () {
-    var files = gulp.src([
-        'app/**/*',
-        '!app/**/styles/',
-        '!app/**/*.scss',
-        '!app/**/*.ts'
-    ], {
-        base: './'
-    })
-        .pipe(gulp.dest('dist'));
-
     var fontawesome = gulp.src('node_modules/font-awesome/fonts/**/*')
         .pipe(gulp.dest('dist/styles/fonts/'));
 
@@ -181,7 +138,74 @@ gulp.task('copy:resources:prod', ['clean'], function () {
     var images = gulp.src('static/images/**/*')
         .pipe(gulp.dest('dist/images/'));
 
-    return es.concat(files, fontawesome, fontawesome2, images);
+    return es.concat(fontawesome, fontawesome2, images);
+});
+
+// TypeScript compile
+gulp.task('compile:prod', ['clean', 'tslint'], function () {
+    return gulp.src([
+            'typings/**/*.ts.d',
+            'app/**/*.ts'
+        ])
+        .pipe(inlineTemp({ UseRelativePaths: true, indent: 0, removeLineBreaks: true }))
+        // .pipe(sourcemaps.init())
+        .pipe(typescript(tscConfig.compilerOptions))
+        .pipe(jsmin())
+        // .pipe(uglify())
+        // .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/app'));
+});
+
+gulp.task('bundle-app:prod', ['copy:resources:prod', 'compile:prod'], function() {
+    var builder = new Builder('', './systemjs.config.js');
+
+    return builder
+        .bundle(
+            'dist/app/**/* - [@angular/**/*.js] - [rxjs/**/*.js]', 'dist/app.min.js',
+            { minify: false, sourceMaps: false }
+            // { minify: true, sourceMaps: true }
+        ).then(function() {
+        })
+        .catch(function(err) {
+            console.log(err);
+        });
+});
+
+gulp.task('bundle-deps:prod', ['copy:resources:prod', 'compile:prod'], function() {
+    var builder = new Builder('', './systemjs.config.js');
+
+    return builder
+        .bundle(
+            'dist/app/**/*.js - [dist/app/**/*.js]', 'dist/deps.min.js',
+            { minify: true, sourceMaps: true }
+        ).then(function() {
+        })
+        .catch(function(err) {
+            console.log(err);
+        });
+});
+
+// Bundle dependencies and app into one file (app.bundle.js)
+gulp.task('bundle:prod', ['bundle-app:prod', 'bundle-deps:prod'], function () {
+    return gulp.src([
+        'dist/app.min.js',
+        'dist/deps.min.js'
+    ])
+        .pipe(concat('app.bundle.js'))
+        // .pipe(uglify())
+        .pipe(gulp.dest('./dist'));
+});
+
+// build html production
+gulp.task('html:prod', ['bundle:prod'], function() {
+    gulp.src('index.html')
+        .pipe(htmlreplace({
+            'deps': 'deps.min.js',
+            'app': 'app.min.js'
+            // 'app': 'app.bundle.js'
+        }))
+        .pipe(htmlmin())
+        .pipe(gulp.dest('dist'));
 });
 
 // build styles production
@@ -222,7 +246,7 @@ gulp.task('build:styles:prod', ['copy:resources:prod'], function () {
 });
 
 // build dependencies production
-gulp.task('build:deps:prod', ['clean', 'build:modules'], function () {
+gulp.task('build:deps:prod', ['clean'], function () {
     return gulp.src([
         'static/scripts/*.js'
     ]).pipe(include())
@@ -232,26 +256,12 @@ gulp.task('build:deps:prod', ['clean', 'build:modules'], function () {
 
 
 /* default */
-gulp.task('dev_build', ['compile', 'build:styles', 'build:deps:dev'], function() {
-    // remove modules folder
-    return del([
-        'dist/js'
-    ]);
-});
+gulp.task('build', ['html', 'build:styles', 'build:deps']);
 
-gulp.task('build', ['build:modules', 'build:styles', 'build:deps'], function() {
+gulp.task('build:prod', ['html:prod', 'build:styles:prod', 'build:deps:prod'], function() {
     // remove modules folder
     return del([
-        'dist/app',
-        'dist/js'
-    ]);
-});
-
-gulp.task('build:prod', ['build:modules:prod', 'build:styles:prod', 'build:deps:prod'], function() {
-    // remove modules folder
-    return del([
-        'dist/app',
-        'dist/js'
+        'dist/app'
     ]);
 });
 
